@@ -1,25 +1,58 @@
 /* =========================================
    GLOBAL
 ========================================= */
-body {
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: white;
-    text-align: center;
-
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
 
 body {
     margin: 0;
-    background-color: #1d1727; /* base purple */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    font-family: Arial, sans-serif;
+    background-color: #1d1727;
+    color: white;
+    text-align: center;
+}
+
+/* =========================================
+   BASE BUTTON BEHAVIOR (no forced color)
+========================================= */
+
+button {
+    appearance: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 
+        transform 0.05s ease,
+        box-shadow 0.15s ease,
+        filter 0.15s ease;
+}
+
+button:hover {
+    filter: brightness(1.1);
+}
+
+button:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
+}
+
+button:focus-visible {
+    outline: 2px solid #9b7dff;
+    outline-offset: 2px;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* =========================================
    BOARD
 ========================================= */
+
 #board {
     display: grid;
     gap: 6px;
@@ -30,7 +63,7 @@ body {
     padding: 24px 10px;
     font-size: 36px;
     font-weight: bold;
-    cursor: pointer;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -45,17 +78,59 @@ body {
 }
 
 .cell.used {
-    background: #555;
+    background: #555 !important;
     color: #7c7a7a;
+}
+
+#scoreboard {
+    margin: 10px auto;
+    display: flex;
+    gap: 14px; /* more room between boxes */
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.score-box {
+    background: #222;
+    border-radius: 8px;
+    padding: 10px;
+    width: 120px; /* box size unchanged */
+    text-align: center;
+}
+
+.score-box .name {
+    font-weight: bold;
+    font-size: 16px; /* slightly larger */
+    margin-bottom: 6px;
+}
+
+.score-box .divider {
+    height: 1px;
+    background: white;
+    margin: 6px 0;
+}
+
+.score-box .score {
+    font-size: 22px; /* slightly larger */
+}
+
+#participant-scores {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 /* =========================================
    MODAL
 ========================================= */
+
 #modal {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -86,6 +161,7 @@ body {
 /* =========================================
    QUESTION PAGE
 ========================================= */
+
 #question-container {
     padding: 40px;
     text-align: center;
@@ -94,6 +170,7 @@ body {
 /* =========================================
    ADMIN PANEL
 ========================================= */
+
 #admin-container {
     max-width: 800px;
     margin: 0 auto;
@@ -122,7 +199,7 @@ label {
     margin-top: 12px;
 }
 
-/* Inputs (but override file inputs below) */
+/* Inputs */
 input,
 textarea,
 select {
@@ -144,7 +221,6 @@ textarea {
     margin: 12px 0;
 }
 
-/* Prevent file inputs from stretching full width */
 .file-upload input[type="file"] {
     width: auto;
 }
@@ -211,29 +287,17 @@ textarea {
     margin-bottom: 8px;
 }
 
-/* BIGGER SPIN BUTTONS FOR NUMBER INPUTS */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-    transform: scale(1.4);
-    margin: 2px;
-}
-
-/* (Optional) Firefox equivalent */
-input[type="number"] {
-    -moz-appearance: textfield;
-}
-
-
 /* =========================================
    MENU
 ========================================= */
+
 #menu-container {
     max-width: 400px;
     margin: 80px auto;
     text-align: center;
     background: #222;
     padding: 40px;
-    border-radius: 8px;
+    border-radius: 12px;
 }
 
 #menu-container button {
@@ -244,9 +308,12 @@ input[type="number"] {
     font-size: 18px;
 }
 
-/* UPLOAD CONTAINER (JSON to Play) */
+/* =========================================
+   UPLOAD CONTAINER
+========================================= */
+
 #upload-container {
-    margin: 40px auto 80px auto; /* space above footer */
+    margin: 40px auto 80px auto;
     padding: 30px;
     background: #222;
     border-radius: 12px;
@@ -257,24 +324,19 @@ input[type="number"] {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
-    position: relative;
-    z-index: 2;
 }
 
-/* BIG, PRETTY BUTTON */
 #upload-container button {
     font-size: 22px;
     padding: 18px 26px;
     border-radius: 8px;
-    border: none;
-    cursor: pointer;
     background: #295792;
     color: white;
     font-weight: bold;
     width: 100%;
 }
 
+/* PRESET SECTION */
 #preset-container {
     margin-top: 25px;
     padding-top: 15px;
@@ -295,15 +357,10 @@ input[type="number"] {
     background: #555;
 }
 
-
-/* BUTTON HOVER */
-#upload-container button:hover {
-    background: #1f4b7a;
-}
-
 /* =========================================
    FOOTER
 ========================================= */
+
 #site-footer {
     margin-top: auto;
     padding: 20px;

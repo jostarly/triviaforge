@@ -2,16 +2,17 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Jeopardy Game</title>
+    <title>Trivia Forge</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Jeopardy</h1>
+<h1 id="game-title" style="margin-bottom: 0;">Trivia Forge</h1>
+<div id="scoreboard"></div>
 <div id="board"></div>
 
 <footer id="site-footer">
-    <button onclick="location.href='mainmenu.html'">Main Menu</button>
+    <button onclick="goMainMenu()">Main Menu</button>
 </footer>
 
 
@@ -24,6 +25,7 @@
     </div>
 </div>
 
+<script src="presets.js"></script>
 <script src="script.js"></script>
 </body>
 

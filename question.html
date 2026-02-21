@@ -24,14 +24,13 @@
 
     <button id="show-answer">Show Answer</button>
     <p id="answer-text" class="hidden"></p>
+    <div id="participant-scores"></div>
     <button id="back">Back to Board</button>
 </div>
 
 <script>
-// SOUND
 const sounds = {
-    chime: new Audio("sounds/chime.mp3"),
-    pop:   new Audio("sounds/pop.mp3")
+    chime: new Audio("sounds/chime.mp3")
 };
 
 function playSound(name) {
@@ -43,13 +42,8 @@ function playSound(name) {
     s.play().catch(() => {});
 }
 
-// PLAY POP IF FLAG
-if (sessionStorage.getItem("playPop") === "true") {
-    playSound("pop");
-    sessionStorage.removeItem("playPop");
-}
-
 // LOAD QUESTION
+let gameData = JSON.parse(sessionStorage.getItem("gameData") || "null");
 const q = JSON.parse(sessionStorage.getItem("currentQuestion") || "null");
 const key = sessionStorage.getItem("currentKey");
 
@@ -75,11 +69,67 @@ if (key) {
     localStorage.setItem(key, "used");
 }
 
-// SHOW ANSWER (chime)
+// SHOW ANSWER
 document.getElementById("show-answer").onclick = () => {
     playSound("chime");
     document.getElementById("answer-text").classList.remove("hidden");
+
+    showParticipantScores();
 };
+
+// SHOW PARTICIPANTS (with individual give buttons)
+function showParticipantScores() {
+    const container = document.getElementById("participant-scores");
+    container.innerHTML = "";
+
+    if (!gameData || !Array.isArray(gameData.participants) || gameData.participants.length === 0) {
+        return;
+    }
+
+    gameData.participants.forEach((p, index) => {
+        const box = document.createElement("div");
+        box.classList.add("score-box");
+
+        const name = document.createElement("div");
+        name.classList.add("name");
+        name.textContent = p.name;
+
+        const divider = document.createElement("div");
+        divider.classList.add("divider");
+
+        const score = document.createElement("div");
+        score.classList.add("score");
+        score.textContent = p.score;
+
+        const give = document.createElement("button");
+        give.textContent = "Give Points";
+        give.style.marginTop = "6px";
+
+        give.onclick = () => {
+            givePoints(index);
+        };
+
+        box.appendChild(name);
+        box.appendChild(divider);
+        box.appendChild(score);
+        box.appendChild(give);
+
+        container.appendChild(box);
+    });
+}
+
+// GIVE POINTS TO SPECIFIC PLAYER
+function givePoints(index) {
+    if (!gameData || !Array.isArray(gameData.participants)) return;
+    if (!q) return;
+    if (!gameData.participants[index]) return;
+
+    gameData.participants[index].score += q.value || 0;
+
+    sessionStorage.setItem("gameData", JSON.stringify(gameData));
+
+    showParticipantScores();
+}
 
 // BACK
 document.getElementById("back").onclick = () => {
@@ -89,7 +139,6 @@ document.getElementById("back").onclick = () => {
     window.location.href = "index.html";
 };
 </script>
-
 
 
 

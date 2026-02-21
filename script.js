@@ -1,13 +1,17 @@
 const board = document.getElementById("board");
 let gameData;
+let boardActive = false;
+
+// TITLE
+const titleEl = document.getElementById("game-title");
 
 // LOAD MODE
 const params = new URLSearchParams(window.location.search);
 
 if (params.get("new") === "true") {
     sessionStorage.removeItem("gameData");
+    sessionStorage.removeItem("participantsSetup");
 
-    // RESET USED CELLS BUT KEEP SETTINGS
     for (const key in localStorage) {
         if (key === "soundEnabled") continue;
         localStorage.removeItem(key);
@@ -20,10 +24,23 @@ if (params.get("new") === "true") {
     if (stored) {
         try {
             gameData = JSON.parse(stored);
-            buildBoard();
+
+            // If participants were already handled OR participants exist, skip prompt
+            if (
+                sessionStorage.getItem("participantsSetup") === "true" ||
+                Array.isArray(gameData.participants)
+            ) {
+                buildBoard();
+            } else {
+                askParticipants().then(() => {
+                    sessionStorage.setItem("participantsSetup", "true");
+                    buildBoard();
+                });
+            }
         } catch (err) {
             console.error("Stored gameData invalid", err);
             sessionStorage.removeItem("gameData");
+            sessionStorage.removeItem("participantsSetup");
             showUploadPrompt();
         }
     } else {
@@ -31,9 +48,9 @@ if (params.get("new") === "true") {
     }
 }
 
-// SOUND EFFECTS
+// SOUND
 const sounds = {
-    pop:   new Audio("sounds/pop.mp3"),
+    pop: new Audio("sounds/pop.mp3"),
     chime: new Audio("sounds/chime.mp3")
 };
 
@@ -46,8 +63,10 @@ function playSound(name) {
     s.play().catch(() => {});
 }
 
-// SHOW UPLOAD + PRESETS
+// SHOW UPLOAD
 function showUploadPrompt() {
+    boardActive = false;
+
     const container = document.createElement("div");
     container.id = "upload-container";
 
@@ -87,16 +106,20 @@ function requestJsonUpload() {
             try {
                 gameData = JSON.parse(ev.target.result);
 
-                // NEW SESSION (but keep settings)
                 for (const key in localStorage) {
                     if (key === "soundEnabled") continue;
                     localStorage.removeItem(key);
                 }
 
                 sessionStorage.setItem("gameData", JSON.stringify(gameData));
+                sessionStorage.removeItem("participantsSetup");
 
                 document.getElementById("upload-container")?.remove();
-                buildBoard();
+
+                askParticipants().then(() => {
+                    sessionStorage.setItem("participantsSetup", "true");
+                    buildBoard();
+                });
             } catch (err) {
                 alert("Invalid JSON file.");
                 console.error(err);
@@ -108,146 +131,74 @@ function requestJsonUpload() {
     input.click();
 }
 
-// PRESET GAMES
-function loadPreset(type) {
-    for (const key in localStorage) {
-        if (key === "soundEnabled") continue;
-        localStorage.removeItem(key);
-    }
+// ASK PARTICIPANTS (one-time setup)
+function askParticipants() {
+    return new Promise(resolve => {
+        if (!gameData) return resolve();
 
-    if (type === "sports") {
-        gameData = {
-            categories: [
-                {
-                    title: "Professional Teams",
-                    questions: [
-                        { value: 200, question: "Which NBA team dominated the 1990s with multiple championships?", answer: "Chicago Bulls" },
-                        { value: 400, question: "Which NFL team has won the most Super Bowls overall?", answer: "New England Patriots and Pittsburgh Steelers (6 each)" },
-                        { value: 600, question: "Which MLB franchise has the most World Series titles?", answer: "New York Yankees" },
-                        { value: 800, question: "Which soccer club has the most UEFA Champions League titles?", answer: "Real Madrid" }
-                    ]
-                },
-                {
-                    title: "Sports Rules",
-                    questions: [
-                        { value: 200, question: "How many points is a field goal in American football?", answer: "3" },
-                        { value: 400, question: "How many players are on the court for one basketball team?", answer: "5" },
-                        { value: 600, question: "What is the offside rule in soccer?", answer: "A player cannot be closer to the goal than the ball and last defender when receiving a pass" },
-                        { value: 800, question: "What does VAR stand for in soccer?", answer: "Video Assistant Referee" }
-                    ]
-                },
-                {
-                    title: "Sports History",
-                    questions: [
-                        { value: 200, question: "In what year were the first modern Olympic Games held?", answer: "1896" },
-                        { value: 400, question: "Which boxer is known as 'The Greatest'?", answer: "Muhammad Ali" },
-                        { value: 600, question: "Which country hosted the 2016 Summer Olympics?", answer: "Brazil" },
-                        { value: 800, question: "Who broke the 100m world record in 2009?", answer: "Usain Bolt" }
-                    ]
-                },
-                {
-                    title: "Sports Records",
-                    questions: [
-                        { value: 200, question: "Who holds the NFL record for career rushing yards?", answer: "Emmitt Smith" },
-                        { value: 400, question: "Who has the most NBA scoring titles?", answer: "Michael Jordan" },
-                        { value: 600, question: "Who hit 73 home runs in a single MLB season?", answer: "Barry Bonds" },
-                        { value: 800, question: "Who holds the record for most Grand Slam tennis titles?", answer: "Margaret Court" }
-                    ]
-                }
-            ]
+        const modal = document.createElement("div");
+        modal.style.position = "fixed";
+        modal.style.inset = "0";
+        modal.style.background = "rgba(0,0,0,0.6)";
+        modal.style.display = "flex";
+        modal.style.alignItems = "center";
+        modal.style.justifyContent = "center";
+        modal.style.zIndex = "9999";
+
+        const box = document.createElement("div");
+        box.style.background = "#222";
+        box.style.padding = "20px";
+        box.style.borderRadius = "8px";
+        box.style.textAlign = "center";
+        box.style.minWidth = "260px";
+
+        const text = document.createElement("p");
+        text.textContent = "Would you like to add participants for score keeping?";
+
+        const yes = document.createElement("button");
+        yes.textContent = "Yes";
+        yes.style.margin = "6px";
+        yes.onclick = () => {
+            document.body.removeChild(modal);
+            collectNames().then(resolve);
         };
-    }
 
-    if (type === "geography") {
-        gameData = {
-            categories: [
-                {
-                    title: "Countries",
-                    questions: [
-                        { value: 200, question: "Which country has the largest land area?", answer: "Russia" },
-                        { value: 400, question: "Which two countries share the longest land border?", answer: "Canada and United States" },
-                        { value: 600, question: "Which country has the most time zones?", answer: "France" },
-                        { value: 800, question: "Which microstate is surrounded by Italy?", answer: "San Marino" }
-                    ]
-                },
-                {
-                    title: "Capitals",
-                    questions: [
-                        { value: 200, question: "What is the capital of Japan?", answer: "Tokyo" },
-                        { value: 400, question: "What is the capital of Australia?", answer: "Canberra" },
-                        { value: 600, question: "What is the capital of Canada?", answer: "Ottawa" },
-                        { value: 800, question: "What is the capital of Iceland?", answer: "Reykjavik" }
-                    ]
-                },
-                {
-                    title: "Landmarks",
-                    questions: [
-                        { value: 200, question: "In which city is the Eiffel Tower located?", answer: "Paris" },
-                        { value: 400, question: "Which structure is the longest human-made wall?", answer: "Great Wall of China" },
-                        { value: 600, question: "In which city is the Colosseum?", answer: "Rome" },
-                        { value: 800, question: "What is the tallest mountain on Earth?", answer: "Mount Everest" }
-                    ]
-                },
-                {
-                    title: "Physical Geography",
-                    questions: [
-                        { value: 200, question: "What is the longest river in the world?", answer: "Nile River" },
-                        { value: 400, question: "What is the largest ocean?", answer: "Pacific Ocean" },
-                        { value: 600, question: "What desert is the largest non-polar desert?", answer: "Sahara Desert" },
-                        { value: 800, question: "What tectonic boundary causes the Pacific Ring of Fire?", answer: "Subduction zones" }
-                    ]
-                }
-            ]
+        const no = document.createElement("button");
+        no.textContent = "No";
+        no.style.margin = "6px";
+        no.onclick = () => {
+            document.body.removeChild(modal);
+            gameData.participants = [];
+            sessionStorage.setItem("gameData", JSON.stringify(gameData));
+            resolve();
         };
-    }
 
-    if (type === "games") {
-        gameData = {
-            categories: [
-                {
-                    title: "Game Studios",
-                    questions: [
-                        { value: 200, question: "Which company created Minecraft?", answer: "Mojang" },
-                        { value: 400, question: "Which studio developed The Legend of Zelda?", answer: "Nintendo EAD" },
-                        { value: 600, question: "Which company created the Unreal Engine?", answer: "Epic Games" },
-                        { value: 800, question: "What year was the original PlayStation released?", answer: "1994" }
-                    ]
-                },
-                {
-                    title: "Game Mechanics",
-                    questions: [
-                        { value: 200, question: "What is RNG?", answer: "Random Number Generation" },
-                        { value: 400, question: "What is frame data?", answer: "Timing data for animations and advantage" },
-                        { value: 600, question: "What is input buffering?", answer: "Queuing inputs to execute on the first valid frame" },
-                        { value: 800, question: "What defines a roguelike?", answer: "Procedural generation with permadeath" }
-                    ]
-                },
-                {
-                    title: "Game History",
-                    questions: [
-                        { value: 200, question: "Which game popularized battle royale?", answer: "PUBG" },
-                        { value: 400, question: "Which game popularized loot boxes?", answer: "Team Fortress 2" },
-                        { value: 600, question: "Which console was first commercially successful?", answer: "Atari 2600" },
-                        { value: 800, question: "In what year did the video game crash occur?", answer: "1983" }
-                    ]
-                },
-                {
-                    title: "Game Definitions",
-                    questions: [
-                        { value: 200, question: "What is speedrunning?", answer: "Completing a game as fast as possible" },
-                        { value: 400, question: "What is permadeath?", answer: "Permanent death with no respawn" },
-                        { value: 600, question: "What defines a metroidvania?", answer: "Nonlinear exploration with ability-gated progression" },
-                        { value: 800, question: "What is a sandbox game?", answer: "A game with open-ended player creativity" }
-                    ]
-                }
-            ]
-        };
-    }
+        box.appendChild(text);
+        box.appendChild(yes);
+        box.appendChild(no);
+        modal.appendChild(box);
+        document.body.appendChild(modal);
+    });
+}
 
-    sessionStorage.setItem("gameData", JSON.stringify(gameData));
+// COLLECT NAMES (only if Yes)
+function collectNames() {
+    return new Promise(resolve => {
+        const names = prompt("Enter participant names (comma separated):");
 
-    document.getElementById("upload-container")?.remove();
-    buildBoard();
+        if (!names) {
+            gameData.participants = [];
+        } else {
+            gameData.participants = names
+                .split(",")
+                .map(n => n.trim())
+                .filter(n => n)
+                .map(n => ({ name: n, score: 0 }));
+        }
+
+        sessionStorage.setItem("gameData", JSON.stringify(gameData));
+        resolve();
+    });
 }
 
 // BUILD BOARD
@@ -257,6 +208,10 @@ function buildBoard() {
 
     const categories = gameData.categories;
     board.style.gridTemplateColumns = `repeat(${categories.length}, 1fr)`;
+
+    if (titleEl) {
+        titleEl.textContent = gameData.gameName || "Trivia Forge";
+    }
 
     categories.forEach(cat => {
         const header = document.createElement("div");
@@ -287,9 +242,72 @@ function buildBoard() {
             board.appendChild(cell);
         });
     }
+
+    renderScores();
+    boardActive = true;
 }
 
-// OPEN QUESTION (pop)
+// SCOREBOARD
+function renderScores() {
+    const scoreboard = document.getElementById("scoreboard");
+    if (!scoreboard) return;
+
+    scoreboard.innerHTML = "";
+
+    if (!gameData || !Array.isArray(gameData.participants) || gameData.participants.length === 0) {
+        return;
+    }
+
+    gameData.participants.forEach((p, index) => {
+        const box = document.createElement("div");
+        box.classList.add("score-box");
+
+        const name = document.createElement("div");
+        name.classList.add("name");
+        name.textContent = p.name;
+
+        const divider = document.createElement("div");
+        divider.classList.add("divider");
+
+        const score = document.createElement("div");
+        score.classList.add("score");
+        score.textContent = p.score;
+
+        const edit = document.createElement("button");
+        edit.textContent = "Edit Score";
+        edit.style.marginTop = "6px";
+
+        edit.onclick = () => {
+            const newScore = prompt("Enter new score for " + p.name, p.score);
+            const num = parseInt(newScore);
+
+            if (!isNaN(num)) {
+                gameData.participants[index].score = num;
+                sessionStorage.setItem("gameData", JSON.stringify(gameData));
+                renderScores();
+            }
+        };
+
+        box.appendChild(name);
+        box.appendChild(divider);
+        box.appendChild(score);
+        box.appendChild(edit);
+
+        scoreboard.appendChild(box);
+    });
+}
+
+// MAIN MENU WARNING
+function goMainMenu() {
+    if (boardActive) {
+        const sure = confirm("Game state will not be saved. Are you sure you want to leave?");
+        if (!sure) return;
+    }
+
+    window.location.href = "mainmenu.html";
+}
+
+// OPEN QUESTION
 function openQuestion(q, key) {
     sessionStorage.setItem("currentQuestion", JSON.stringify(q));
     sessionStorage.setItem("currentKey", key);
