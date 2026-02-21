@@ -1,37 +1,61 @@
+/* =========================================
+   GLOBAL
+========================================= */
 body {
     font-family: Arial, sans-serif;
     background: #111;
     color: white;
     text-align: center;
+
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
+body {
+    margin: 0;
+    background-color: #1d1727; /* base purple */
+}
+
+/* =========================================
+   BOARD
+========================================= */
 #board {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 5px;
-    width: 90%;
-    margin: 20px auto;
+    gap: 6px;
 }
 
 .cell {
-    background: blue;
-    padding: 20px;
-    cursor: pointer;
+    background: #295792;
+    padding: 24px 10px;
+    font-size: 36px;
     font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70px;
+}
+
+.cell.category {
+    border: 2px solid #ffffff;
+    background: #142b7a;
+    font-size: 36px;
+    cursor: default;
 }
 
 .cell.used {
-    background: #333;
-    pointer-events: none;
+    background: #555;
+    color: #7c7a7a;
 }
 
+/* =========================================
+   MODAL
+========================================= */
 #modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -43,6 +67,251 @@ body {
 
 #modal-content {
     background: #222;
+    padding: 30px;
+    width: 420px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+#question-text {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+#answer-text {
+    margin-top: 20px;
+    color: #8f8;
+}
+
+/* =========================================
+   QUESTION PAGE
+========================================= */
+#question-container {
+    padding: 40px;
+    text-align: center;
+}
+
+/* =========================================
+   ADMIN PANEL
+========================================= */
+#admin-container {
+    max-width: 800px;
+    margin: 0 auto;
     padding: 20px;
-    width: 400px;
+}
+
+.panel {
+    background: #222;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 6px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.panel h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+}
+
+/* Inputs (but override file inputs below) */
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    box-sizing: border-box;
+}
+
+textarea {
+    height: 90px;
+}
+
+/* FILE INPUT CENTERING */
+.file-upload {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 12px 0;
+}
+
+/* Prevent file inputs from stretching full width */
+.file-upload input[type="file"] {
+    width: auto;
+}
+
+/* PREVIEWS */
+#image-preview {
+    max-width: 200px;
+    display: none;
+    margin-top: 8px;
+}
+
+#audio-preview {
+    display: none;
+    margin-top: 8px;
+}
+
+/* ACTION BUTTONS */
+.actions {
+    text-align: center;
+}
+
+.actions button {
+    margin: 6px;
+    padding: 10px 18px;
+}
+
+/* CATEGORY LIST */
+#category-list div {
+    margin-bottom: 8px;
+}
+
+/* EXISTING QUESTIONS */
+#list h3 {
+    margin-top: 18px;
+}
+
+#list div {
+    margin-bottom: 8px;
+}
+
+/* EDIT / DELETE BUTTONS */
+#list button,
+#category-list button {
+    margin-left: 6px;
+    padding: 4px 10px;
+}
+
+/* DELETE BUTTON (light red) */
+#list button.delete,
+#category-list button.delete {
+    background: #f5b0b0;
+    color: #600;
+}
+
+/* NEW CATEGORY INPUT */
+#new-category {
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+/* ADD CATEGORY BUTTON */
+#add-category {
+    padding: 8px 14px;
+    margin-bottom: 8px;
+}
+
+/* BIGGER SPIN BUTTONS FOR NUMBER INPUTS */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    transform: scale(1.4);
+    margin: 2px;
+}
+
+/* (Optional) Firefox equivalent */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+
+/* =========================================
+   MENU
+========================================= */
+#menu-container {
+    max-width: 400px;
+    margin: 80px auto;
+    text-align: center;
+    background: #222;
+    padding: 40px;
+    border-radius: 8px;
+}
+
+#menu-container button {
+    display: block;
+    width: 100%;
+    margin: 12px 0;
+    padding: 12px;
+    font-size: 18px;
+}
+
+/* UPLOAD CONTAINER (JSON to Play) */
+#upload-container {
+    margin: 40px auto 80px auto; /* space above footer */
+    padding: 30px;
+    background: #222;
+    border-radius: 12px;
+    max-width: 420px;
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+    z-index: 2;
+}
+
+/* BIG, PRETTY BUTTON */
+#upload-container button {
+    font-size: 22px;
+    padding: 18px 26px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #295792;
+    color: white;
+    font-weight: bold;
+    width: 100%;
+}
+
+#preset-container {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #444;
+}
+
+#preset-container h3 {
+    margin-bottom: 12px;
+}
+
+#preset-container button {
+    margin: 6px 0;
+    width: 100%;
+    background: #444;
+}
+
+#preset-container button:hover {
+    background: #555;
+}
+
+
+/* BUTTON HOVER */
+#upload-container button:hover {
+    background: #1f4b7a;
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+#site-footer {
+    margin-top: auto;
+    padding: 20px;
+    background: #222;
+    text-align: center;
+}
+
+#site-footer button {
+    padding: 10px 18px;
+    font-size: 16px;
 }

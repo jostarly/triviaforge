@@ -3,15 +3,51 @@
     {
       "title": "Science",
       "questions": [
-        { "value": 100, "question": "What planet is closest to the sun?", "answer": "Mercury" },
-        { "value": 200, "question": "What gas do plants breathe in?", "answer": "Carbon Dioxide" }
+        {
+          "value": 100,
+          "question": "What planet is closest to the sun?",
+          "answer": "Mercury"
+        },
+        {
+          "value": 200,
+          "question": "What gas do plants breathe in?",
+          "answer": "Carbon Dioxide"
+        }
+      ]
+    },
+    {
+      "title": "Word Association",
+      "questions": [
+        {
+          "value": 100,
+          "question": "What planet is closest to the sun?",
+          "answer": "Mercury"
+        },
+        {
+          "value": 200,
+          "question": "What gas do plants breathe in?",
+          "answer": "Carbon Dioxide"
+        }
       ]
     },
     {
       "title": "Games",
       "questions": [
-        { "value": 100, "question": "What company makes Mario?", "answer": "Nintendo" },
-        { "value": 200, "question": "What engine does James use?", "answer": "GameMaker" }
+        {
+          "value": 100,
+          "question": "What company makes Mario?",
+          "answer": "Nintendo"
+        }
+      ]
+    },
+    {
+      "title": "Pickles",
+      "questions": [
+        {
+          "value": 400,
+          "question": "Yes?",
+          "answer": "Oh yeah"
+        }
       ]
     }
   ]

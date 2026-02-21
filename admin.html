@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Trivia Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Question Editor</h1>
+
+<div id="admin-container">
+
+    <!-- GAME NAME -->
+    <section class="panel">
+        <h2>Game Name</h2>
+        <input id="game-name" placeholder="My Trivia Game">
+    </section>
+
+    <!-- JSON UPLOAD -->
+    <section class="panel">
+        <h2>Load From JSON</h2>
+        <div class="file-upload">
+            <input type="file" id="json-upload" accept=".json">
+        </div>
+        <p>Upload to start editing from existing data.</p>
+    </section>
+
+    <!-- CATEGORY MANAGEMENT -->
+    <section class="panel">
+        <h2>Categories</h2>
+
+        <input id="new-category" placeholder="New category name">
+
+        <button id="add-category">Add / Update Category</button>
+
+        <div id="category-list"></div>
+    </section>
+
+    <!-- QUESTION DETAILS -->
+    <section class="panel">
+        <h2>Question Details</h2>
+
+        <label>Category</label>
+        <select id="category-select"></select>
+
+        <label>Value</label>
+        <input id="value" type="number" step="100" min="0" placeholder="100">
+
+        <label>Question</label>
+        <textarea id="question"></textarea>
+
+        <label>Answer</label>
+        <textarea id="answer"></textarea>
+
+        <!-- IMAGE UPLOAD -->
+        <label>Image (optional)</label>
+        <div class="file-upload">
+            <input type="file" id="image-upload" accept="image/*">
+        </div>
+        <img id="image-preview" style="max-width: 200px; display: none; margin-top: 8px;">
+        <button id="remove-image" style="display:none; margin-top: 5px;">Remove Image</button>
+
+        <!-- AUDIO UPLOAD -->
+        <label>Audio (optional)</label>
+        <div class="file-upload">
+            <input type="file" id="audio-upload" accept="audio/*">
+        </div>
+        <audio id="audio-preview" controls style="display: none; margin-top: 8px;"></audio>
+        <button id="remove-audio" style="display:none; margin-top: 5px;">Remove Audio</button>
+    </section>
+
+    <!-- ACTIONS -->
+    <section class="panel actions">
+        <button id="add">Add / Update Question</button>
+        <button id="download">Download Updated JSON</button>
+    </section>
+
+    <!-- EXISTING QUESTIONS -->
+    <section class="panel" id="existing-section" style="display: none;">
+        <h2>Existing Questions</h2>
+        <div id="list"></div>
+    </section>
+
+</div>
+
+<footer id="site-footer">
+    <button onclick="location.href='mainmenu.html'">Main Menu</button>
+</footer>
+
+<script>
+let gameData = { gameName: "", categories: [] };
+let editingQuestion = null;
+let editingCategory = null;
+
+let imagePreviewUrl = null;
+let audioPreviewUrl = null;
+
+// =========================================
+// HANDLE JSON UPLOAD
+// =========================================
+document.getElementById("json-upload").addEventListener("change", event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+        try {
+            gameData = JSON.parse(e.target.result);
+            renderAll();
+            alert("JSON loaded successfully!");
+        } catch (err) {
+            alert("Invalid JSON file.");
+            console.error(err);
+        }
+    };
+
+    reader.readAsText(file);
+});
+
+// =========================================
+// CATEGORY DROPDOWN & LIST RENDERING
+// =========================================
+function renderCategories() {
+    const select = document.getElementById("category-select");
+    select.innerHTML = "";
+
+    if (!Array.isArray(gameData.categories)) return;
+
+    gameData.categories.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat.title;
+        opt.textContent = cat.title;
+        select.appendChild(opt);
+    });
+}
+
+function renderCategoryList() {
+    const list = document.getElementById("category-list");
+    list.innerHTML = "";
+
+    if (!Array.isArray(gameData.categories)) return;
+
+    gameData.categories.forEach((cat, index) => {
+        const div = document.createElement("div");
+        div.style.marginBottom = "8px";
+
+        div.textContent = cat.title;
+
+        const edit = document.createElement("button");
+        edit.textContent = "Edit";
+        edit.onclick = () => {
+            editingCategory = index;
+            document.getElementById("new-category").value = cat.title;
+        };
+
+        const del = document.createElement("button");
+        del.textContent = "Delete";
+        del.classList.add("delete");
+        del.onclick = () => {
+            if (!confirm("Delete this category and all its questions?")) return;
+
+            gameData.categories.splice(index, 1);
+            renderAll();
+        };
+
+        div.appendChild(edit);
+        div.appendChild(del);
+        list.appendChild(div);
+    });
+}
+
+// ADD OR UPDATE CATEGORY (REAL TIME)
+document.getElementById("add-category").onclick = () => {
+    const name = document.getElementById("new-category").value;
+
+    if (!name) {
+        alert("Category name required.");
+        return;
+    }
+
+    if (!Array.isArray(gameData.categories)) {
+        gameData.categories = [];
+    }
+
+    if (editingCategory !== null) {
+        gameData.categories[editingCategory].title = name;
+        editingCategory = null;
+    } else {
+        gameData.categories.push({ title: name, questions: [] });
+    }
+
+    renderCategories();
+    renderCategoryList();
+
+    document.getElementById("new-category").value = "";
+};
+
+// =========================================
+// IMAGE PREVIEW
+// =========================================
+document.getElementById("image-upload").addEventListener("change", e => {
+    const file = e.target.files[0];
+    const preview = document.getElementById("image-preview");
+    const removeBtn = document.getElementById("remove-image");
+
+    if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+        imagePreviewUrl = null;
+    }
+
+    if (!file) {
+        preview.style.display = "none";
+        preview.src = "";
+        removeBtn.style.display = "none";
+        return;
+    }
+
+    imagePreviewUrl = URL.createObjectURL(file);
+    preview.src = imagePreviewUrl;
+    preview.style.display = "block";
+    removeBtn.style.display = "inline-block";
+});
+
+// REMOVE IMAGE
+document.getElementById("remove-image").onclick = () => {
+    const upload = document.getElementById("image-upload");
+    const preview = document.getElementById("image-preview");
+
+    upload.value = "";
+    preview.src = "";
+    preview.style.display = "none";
+
+    if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+        imagePreviewUrl = null;
+    }
+
+    document.getElementById("remove-image").style.display = "none";
+};
+
+// =========================================
+// AUDIO PREVIEW
+// =========================================
+document.getElementById("audio-upload").addEventListener("change", e => {
+    const file = e.target.files[0];
+    const audio = document.getElementById("audio-preview");
+    const removeBtn = document.getElementById("remove-audio");
+
+    if (audioPreviewUrl) {
+        URL.revokeObjectURL(audioPreviewUrl);
+        audioPreviewUrl = null;
+    }
+
+    if (!file) {
+        audio.style.display = "none";
+        audio.src = "";
+        removeBtn.style.display = "none";
+        return;
+    }
+
+    audioPreviewUrl = URL.createObjectURL(file);
+    audio.src = audioPreviewUrl;
+    audio.style.display = "block";
+    removeBtn.style.display = "inline-block";
+});
+
+// REMOVE AUDIO
+document.getElementById("remove-audio").onclick = () => {
+    const upload = document.getElementById("audio-upload");
+    const audio = document.getElementById("audio-preview");
+
+    upload.value = "";
+    audio.src = "";
+    audio.style.display = "none";
+
+    if (audioPreviewUrl) {
+        URL.revokeObjectURL(audioPreviewUrl);
+        audioPreviewUrl = null;
+    }
+
+    document.getElementById("remove-audio").style.display = "none";
+};
+
+// =========================================
+// RENDER EVERYTHING
+// =========================================
+function renderAll() {
+    document.getElementById("game-name").value = gameData.gameName || "";
+
+    renderCategories();
+    renderCategoryList();
+    renderQuestionList();
+    clearForm();
+}
+
+// QUESTION LIST (EDIT / DUPLICATE / DELETE)
+function renderQuestionList() {
+    const section = document.getElementById("existing-section");
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    let hasQuestions = false;
+
+    if (Array.isArray(gameData.categories)) {
+        gameData.categories.forEach((cat, catIndex) => {
+            if (Array.isArray(cat.questions) && cat.questions.length > 0) {
+                hasQuestions = true;
+
+                const h = document.createElement("h3");
+                h.textContent = cat.title;
+                list.appendChild(h);
+
+                cat.questions.forEach((q, qIndex) => {
+                    const div = document.createElement("div");
+                    div.style.marginBottom = "8px";
+
+                    div.textContent = `${q.value}: ${q.question}`;
+
+                    // EDIT
+                    const edit = document.createElement("button");
+                    edit.textContent = "Edit";
+                    edit.onclick = () => {
+                        editingQuestion = { catIndex, qIndex };
+
+                        document.getElementById("category-select").value = cat.title;
+                        document.getElementById("value").value = q.value;
+                        document.getElementById("question").value = q.question;
+                        document.getElementById("answer").value = q.answer || "";
+
+                        if (q.image) {
+                            document.getElementById("image-preview").src = q.image;
+                            document.getElementById("image-preview").style.display = "block";
+                            document.getElementById("remove-image").style.display = "inline-block";
+                        }
+
+                        if (q.audio) {
+                            document.getElementById("audio-preview").src = q.audio;
+                            document.getElementById("audio-preview").style.display = "block";
+                            document.getElementById("remove-audio").style.display = "inline-block";
+                        }
+                    };
+
+                    // DUPLICATE
+                    const duplicate = document.createElement("button");
+                    duplicate.textContent = "Duplicate";
+                    duplicate.onclick = () => {
+                        const original = cat.questions[qIndex];
+
+                        cat.questions.push({
+                            value: original.value,
+                            question: original.question,
+                            answer: original.answer,
+                            image: original.image,
+                            audio: original.audio
+                        });
+
+                        renderQuestionList();
+                    };
+
+                    // DELETE
+                    const del = document.createElement("button");
+                    del.textContent = "Delete";
+                    del.classList.add("delete");
+                    del.onclick = () => {
+                        if (!confirm("Delete this question?")) return;
+
+                        cat.questions.splice(qIndex, 1);
+                        renderQuestionList();
+                    };
+
+                    div.appendChild(edit);
+                    div.appendChild(duplicate);
+                    div.appendChild(del);
+                    list.appendChild(div);
+                });
+            }
+        });
+    }
+
+    section.style.display = hasQuestions ? "block" : "none";
+}
+
+// ADD OR UPDATE QUESTION
+document.getElementById("add").onclick = async () => {
+    const categoryName = document.getElementById("category-select").value;
+    const value = parseInt(document.getElementById("value").value);
+    const question = document.getElementById("question").value;
+    const answer = document.getElementById("answer").value;
+
+    if (!categoryName || isNaN(value)) {
+        alert("Category and value are required.");
+        return;
+    }
+
+    let category = gameData.categories.find(c => c.title === categoryName);
+    if (!category) return;
+
+    let imageData = null;
+    let audioData = null;
+
+    const imgFile = document.getElementById("image-upload").files[0];
+    const audioFile = document.getElementById("audio-upload").files[0];
+
+    if (imgFile) imageData = await toDataURL(imgFile);
+    if (audioFile) audioData = await toDataURL(audioFile);
+
+    if (editingQuestion) {
+        const q = category.questions[editingQuestion.qIndex];
+        q.value = value;
+        q.question = question;
+        q.answer = answer;
+        q.image = imageData || q.image;
+        q.audio = audioData || q.audio;
+        editingQuestion = null;
+    } else {
+        category.questions.push({ value, question, answer, image: imageData, audio: audioData });
+    }
+
+    renderQuestionList();
+    clearForm();
+};
+
+// CONVERT FILE TO DATA URL
+function toDataURL(file) {
+    return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(file);
+    });
+}
+
+// CLEAR FORM
+function clearForm() {
+    document.getElementById("new-category").value = "";
+    document.getElementById("value").value = "";
+    document.getElementById("question").value = "";
+    document.getElementById("answer").value = "";
+
+    document.getElementById("image-upload").value = "";
+    document.getElementById("audio-upload").value = "";
+
+    document.getElementById("image-preview").style.display = "none";
+    document.getElementById("audio-preview").style.display = "none";
+
+    document.getElementById("image-preview").src = "";
+    document.getElementById("audio-preview").src = "";
+
+    document.getElementById("remove-image").style.display = "none";
+    document.getElementById("remove-audio").style.display = "none";
+
+    if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+        imagePreviewUrl = null;
+    }
+
+    if (audioPreviewUrl) {
+        URL.revokeObjectURL(audioPreviewUrl);
+        audioPreviewUrl = null;
+    }
+}
+
+// DOWNLOAD JSON
+document.getElementById("download").onclick = () => {
+    const blob = new Blob([JSON.stringify(gameData, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "questions.json";
+    a.click();
+};
+
+// GAME NAME CHANGE
+document.getElementById("game-name").addEventListener("input", e => {
+    gameData.gameName = e.target.value;
+});
+
+// INITIAL STATE
+renderAll();
+</script>
+
+</body>
+</html>

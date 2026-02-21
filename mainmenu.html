@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Trivia Menu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="menu-container">
+    <h1>Trivia Menu</h1>
+
+    <button onclick="location.href='index.html?new=true'">
+        Play Game
+    </button>
+
+    <button onclick="location.href='admin.html'">Question Editor</button>
+
+<div id="sound-setting">
+    <label>
+        <input type="checkbox" id="sound-toggle">
+        Enable Sound Effects
+    </label>
+</div>
+
+<script>
+if (localStorage.getItem("soundEnabled") === null) {
+    localStorage.setItem("soundEnabled", "false");
+}
+
+const toggle = document.getElementById("sound-toggle");
+toggle.checked = localStorage.getItem("soundEnabled") === "true";
+
+toggle.addEventListener("change", () => {
+    localStorage.setItem("soundEnabled", toggle.checked ? "true" : "false");
+});
+</script>
+
+
+</body>
+</html>

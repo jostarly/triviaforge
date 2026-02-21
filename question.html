@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Question</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="question-container">
+    <p id="question-text"></p>
+
+    <img id="question-image"
+         style="max-width: 80%;
+                max-height: 400px;
+                display: none;
+                margin: 12px auto;
+                object-fit: contain;">
+
+    <audio id="question-audio"
+           controls
+           style="display: none;
+                  margin: 12px auto;"></audio>
+
+    <button id="show-answer">Show Answer</button>
+    <p id="answer-text" class="hidden"></p>
+    <button id="back">Back to Board</button>
+</div>
+
+<script>
+// SOUND
+const sounds = {
+    chime: new Audio("sounds/chime.mp3"),
+    pop:   new Audio("sounds/pop.mp3")
+};
+
+function playSound(name) {
+    if (localStorage.getItem("soundEnabled") !== "true") return;
+
+    const s = sounds[name];
+    if (!s) return;
+    s.currentTime = 0;
+    s.play().catch(() => {});
+}
+
+// PLAY POP IF FLAG
+if (sessionStorage.getItem("playPop") === "true") {
+    playSound("pop");
+    sessionStorage.removeItem("playPop");
+}
+
+// LOAD QUESTION
+const q = JSON.parse(sessionStorage.getItem("currentQuestion") || "null");
+const key = sessionStorage.getItem("currentKey");
+
+if (q) {
+    document.getElementById("question-text").textContent = q.question || "";
+    document.getElementById("answer-text").textContent = q.answer || "";
+
+    if (q.image) {
+        const img = document.getElementById("question-image");
+        img.src = q.image;
+        img.style.display = "block";
+    }
+
+    if (q.audio) {
+        const aud = document.getElementById("question-audio");
+        aud.src = q.audio;
+        aud.style.display = "block";
+    }
+}
+
+// MARK USED
+if (key) {
+    localStorage.setItem(key, "used");
+}
+
+// SHOW ANSWER (chime)
+document.getElementById("show-answer").onclick = () => {
+    playSound("chime");
+    document.getElementById("answer-text").classList.remove("hidden");
+};
+
+// BACK
+document.getElementById("back").onclick = () => {
+    sessionStorage.removeItem("currentQuestion");
+    sessionStorage.removeItem("currentKey");
+
+    window.location.href = "index.html";
+};
+</script>
+
+
+
+
+</body>
+</html>
