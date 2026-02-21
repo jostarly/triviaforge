@@ -1,0 +1,18 @@
+{
+  "categories": [
+    {
+      "title": "Science",
+      "questions": [
+        { "value": 100, "question": "What planet is closest to the sun?", "answer": "Mercury" },
+        { "value": 200, "question": "What gas do plants breathe in?", "answer": "Carbon Dioxide" }
+      ]
+    },
+    {
+      "title": "Games",
+      "questions": [
+        { "value": 100, "question": "What company makes Mario?", "answer": "Nintendo" },
+        { "value": 200, "question": "What engine does James use?", "answer": "GameMaker" }
+      ]
+    }
+  ]
+}
