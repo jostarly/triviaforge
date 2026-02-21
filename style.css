@@ -1,0 +1,48 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+    width: 90%;
+    margin: 20px auto;
+}
+
+.cell {
+    background: blue;
+    padding: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.cell.used {
+    background: #333;
+    pointer-events: none;
+}
+
+#modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#modal-content {
+    background: #222;
+    padding: 20px;
+    width: 400px;
+}
