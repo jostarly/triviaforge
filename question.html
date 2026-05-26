@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Question</title>
+
+    <!-- Silkscreen -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -24,9 +31,15 @@
 
     <button id="show-answer">Show Answer</button>
     <p id="answer-text" class="hidden"></p>
+
     <div id="participant-scores"></div>
+</div>
+
+<!-- FOOTER BACK BUTTON -->
+<div id="question-footer">
     <button id="back">Back to Board</button>
 </div>
+
 
 <script>
 const sounds = {
@@ -80,6 +93,12 @@ document.getElementById("show-answer").onclick = () => {
 // SHOW PARTICIPANTS (with individual give buttons)
 function showParticipantScores() {
     const container = document.getElementById("participant-scores");
+    
+    if (!container) {
+        console.error("participant-scores element not found");
+        return;
+    }
+    
     container.innerHTML = "";
 
     if (!gameData || !Array.isArray(gameData.participants) || gameData.participants.length === 0) {
@@ -141,6 +160,6 @@ document.getElementById("back").onclick = () => {
 </script>
 
 
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

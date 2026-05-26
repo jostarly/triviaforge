@@ -3,77 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <title>Trivia Admin</title>
+
+    <!-- Silkscreen -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Question Editor</h1>
-
-<div id="admin-container">
-
-    <section class="panel">
-        <h2>Game Name</h2>
-        <input id="game-name" placeholder="My Trivia Game">
-    </section>
-
-    <section class="panel">
-        <h2>Load From JSON</h2>
-        <div class="file-upload">
-            <input type="file" id="json-upload" accept=".json">
+<div id="admin-container" class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-2 col-md-6 text-center">
+            <section class="panel">
+                <h2>Load Game</h2>
+                <div>
+                    <input type="file" id="json-upload" accept=".json">
+                </div>
+            </section>
         </div>
-        <p>Upload to start editing from existing data.</p>
-    </section>
-
-    <section class="panel">
-        <h2>Categories</h2>
-
-        <input id="new-category" placeholder="New category name">
-
-        <button id="add-category">Add / Update Category</button>
-
-        <div id="category-list"></div>
-    </section>
-
-    <section class="panel">
-        <h2>Question Details</h2>
-
-        <label>Category</label>
-        <select id="category-select"></select>
-
-        <label>Value</label>
-        <input id="value" type="number" step="100" min="0" placeholder="100">
-
-        <label>Question</label>
-        <textarea id="question"></textarea>
-
-        <label>Answer</label>
-        <textarea id="answer"></textarea>
-
-        <label>Image (optional)</label>
-        <div class="file-upload">
-            <input type="file" id="image-upload" accept="image/*">
+        <div class="col-lg-2 col-md-6 text-center">
+            <section class="panel">
+                <h2>Game Name</h2>
+                <input id="game-name" placeholder="My Trivia Game">
+            </section>
         </div>
-        <img id="image-preview" style="max-width: 200px; display: none; margin-top: 8px;">
-        <button id="remove-image" style="display:none; margin-top: 5px;">Remove Image</button>
-
-        <label>Audio (optional)</label>
-        <div class="file-upload">
-            <input type="file" id="audio-upload" accept="audio/*">
+        <div class="col-lg-1">
+            <section class="panel">
+                <button id="download" style="background-color: green;">Save Game</button>
+            </section>
         </div>
-        <audio id="audio-preview" controls style="display: none; margin-top: 8px;"></audio>
-        <button id="remove-audio" style="display:none; margin-top: 5px;">Remove Audio</button>
-    </section>
+    </div>
 
-    <section class="panel actions">
-        <button id="add">Add / Update Question</button>
-        <button id="download">Download Updated JSON</button>
-    </section>
+    <div class="row g-4">
+        <!-- LEFT COLUMN: Setup & Categories -->
+        <div class="col-lg-4">
+            <section class="panel">
+                <h2>Categories</h2>
 
-    <section class="panel" id="existing-section" style="display: none;">
-        <h2>Existing Questions</h2>
-        <div id="list"></div>
-    </section>
+                <input id="new-category" placeholder="New category name" style="width: 50%;">
 
+                <button id="add-category" style="background-color: green;">Save Category</button>
+
+                <div id="category-list"></div>
+            </section>
+
+            <section class="panel" id="existing-section" style="display: none;">
+                <h2>Questions</h2>
+                <div id="list"></div>
+            </section>
+        </div>
+
+        <!-- CENTER COLUMN: Question Details -->
+        <div class="col-lg-8">
+            <section class="panel">
+                <h2>Question Details</h2>
+                    <div class="row justify-content-center">
+                        <div class="col-md-3">
+                            <label>Category</label>
+                            <select id="category-select"></select></select>
+                        </div>
+                        <div class="col-md-1">
+                            <label>Value</label>
+                            <input id="value" type="number" step="100" min="0" placeholder="100">
+                        </div> 
+                
+                </div>
+                <label>Question</label>
+                <textarea id="question"></textarea>
+
+                <label>Answer</label>
+                <textarea id="answer"></textarea>
+
+                <label>Image (optional)</label>
+                <div class="file-upload">
+                    <input type="file" id="image-upload" accept="image/*">
+                </div>
+                <img id="image-preview" style="max-width: 200px; display: none; margin-top: 8px;">
+                <button id="remove-image" style="display:none; margin-top: 5px;">Remove Image</button>
+
+                <label>Audio (optional)</label>
+                <div class="file-upload">
+                    <input type="file" id="audio-upload" accept="audio/*">
+                </div>
+                <audio id="audio-preview" controls style="display: none; margin-top: 8px;"></audio>
+                <button id="remove-audio" style="display:none; margin-top: 5px;">Remove Audio</button>
+                <button id="add" style="background-color: green;">Save  Question</button>
+            </section>
+        </div>
+    </div>
 </div>
 
 <footer id="site-footer">
@@ -87,6 +107,7 @@ let editingCategory = null;
 
 let imagePreviewUrl = null;
 let audioPreviewUrl = null;
+let hasUnsavedChanges = false;
 
 // JSON UPLOAD
 document.getElementById("json-upload").addEventListener("change", event => {
@@ -98,6 +119,7 @@ document.getElementById("json-upload").addEventListener("change", event => {
     reader.onload = e => {
         try {
             gameData = JSON.parse(e.target.result);
+            hasUnsavedChanges = false;
             renderAll();
             alert("JSON loaded successfully!");
         } catch (err) {
@@ -150,6 +172,7 @@ function renderCategoryList() {
         del.onclick = () => {
             if (!confirm("Delete this category and all its questions?")) return;
             gameData.categories.splice(index, 1);
+            hasUnsavedChanges = true;
             renderAll();
         };
 
@@ -178,6 +201,7 @@ document.getElementById("add-category").onclick = () => {
         gameData.categories.push({ title: name, questions: [] });
     }
 
+    hasUnsavedChanges = true;
     renderCategories();
     renderCategoryList();
     document.getElementById("new-category").value = "";
@@ -329,6 +353,7 @@ function renderQuestionList() {
                             image: original.image,
                             audio: original.audio
                         });
+                        hasUnsavedChanges = true;
                         renderQuestionList();
                     };
 
@@ -338,6 +363,7 @@ function renderQuestionList() {
                     del.onclick = () => {
                         if (!confirm("Delete this question?")) return;
                         cat.questions.splice(qIndex, 1);
+                        hasUnsavedChanges = true;
                         renderQuestionList();
                     };
 
@@ -389,6 +415,7 @@ document.getElementById("add").onclick = async () => {
         category.questions.push({ value, question, answer, image: imageData, audio: audioData });
     }
 
+    hasUnsavedChanges = true;
     renderQuestionList();
     clearForm();
 };
@@ -434,16 +461,28 @@ document.getElementById("download").onclick = () => {
     const blob = new Blob([JSON.stringify(gameData, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "questions.json";
+    const filename = gameData.gameName ? gameData.gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + ".json" : "questions.json";
+    a.download = filename;
     a.click();
+    hasUnsavedChanges = false;
 };
 
 document.getElementById("game-name").addEventListener("input", e => {
     gameData.gameName = e.target.value;
+    hasUnsavedChanges = true;
+});
+
+// Prompt on unsaved changes
+window.addEventListener("beforeunload", e => {
+    if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+    }
 });
 
 renderAll();
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

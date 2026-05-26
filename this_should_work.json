@@ -1,0 +1,83 @@
+{
+  "gameName": "This should work",
+  "categories": [
+    {
+      "title": "1",
+      "questions": [
+        {
+          "value": 100,
+          "question": "aaaaa",
+          "answer": "aaaa",
+          "image": null,
+          "audio": null
+        },
+        {
+          "value": 100,
+          "question": "aaaaa",
+          "answer": "aaaa",
+          "image": null,
+          "audio": null
+        },
+        {
+          "value": 100,
+          "question": "aaaaa",
+          "answer": "aaaa",
+          "image": null,
+          "audio": null
+        }
+      ]
+    },
+    {
+      "title": "2",
+      "questions": [
+        {
+          "value": 400,
+          "question": "ssssssss",
+          "answer": "sssss",
+          "image": null,
+          "audio": null
+        },
+        {
+          "value": 400,
+          "question": "ssssssss",
+          "answer": "sssss",
+          "image": null,
+          "audio": null
+        },
+        {
+          "value": 400,
+          "question": "ssssssss",
+          "answer": "sssss",
+          "image": null,
+          "audio": null
+        }
+      ]
+    },
+    {
+      "title": "3",
+      "questions": [
+        {
+          "value": 500,
+          "question": "ssss",
+          "answer": "ssss",
+          "image": null,
+          "audio": null
+        },
+        {
+          "value": 500,
+          "question": "ssss",
+          "answer": "ssss",
+          "image": null,
+          "audio": null
+        },
+        {
+          "value": 500,
+          "question": "ssss",
+          "answer": "ssss",
+          "image": null,
+          "audio": null
+        }
+      ]
+    }
+  ]
+}

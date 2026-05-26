@@ -106,6 +106,12 @@ function requestJsonUpload() {
             try {
                 gameData = JSON.parse(ev.target.result);
 
+                // Validate that JSON has required structure
+                if (!gameData.categories || !Array.isArray(gameData.categories) || gameData.categories.length === 0) {
+                    alert("Invalid JSON format. Must have a 'categories' array with questions.");
+                    return;
+                }
+
                 for (const key in localStorage) {
                     if (key === "soundEnabled") continue;
                     localStorage.removeItem(key);
@@ -203,48 +209,59 @@ function collectNames() {
 
 // BUILD BOARD
 function buildBoard() {
-    const board = document.getElementById("board");
-    board.innerHTML = "";
+    try {
+        const board = document.getElementById("board");
+        if (!board) return;
 
-    const categories = gameData.categories;
-    board.style.gridTemplateColumns = `repeat(${categories.length}, 1fr)`;
+        board.innerHTML = "";
 
-    if (titleEl) {
-        titleEl.textContent = gameData.gameName || "Trivia Forge";
-    }
+        if (!gameData || !gameData.categories || !Array.isArray(gameData.categories)) {
+            console.error("Invalid gameData structure");
+            return;
+        }
 
-    categories.forEach(cat => {
-        const header = document.createElement("div");
-        header.classList.add("cell", "category");
-        header.textContent = cat.title;
-        board.appendChild(header);
-    });
+        const categories = gameData.categories;
+        board.style.gridTemplateColumns = `repeat(${categories.length}, 1fr)`;
 
-    const rows = categories[0].questions.length;
+        if (titleEl) {
+            titleEl.textContent = gameData.gameName || "Trivia Forge";
+        }
 
-    for (let i = 0; i < rows; i++) {
         categories.forEach(cat => {
-            const q = cat.questions[i];
-
-            const cell = document.createElement("div");
-            cell.classList.add("cell");
-
-            const key = `${cat.title}-${q.value}`;
-            cell.dataset.key = key;
-
-            if (localStorage.getItem(key) === "used") {
-                cell.classList.add("used");
-            }
-
-            cell.textContent = q.value;
-            cell.addEventListener("click", () => openQuestion(q, key));
-
-            board.appendChild(cell);
+            const header = document.createElement("div");
+            header.classList.add("cell", "category");
+            header.textContent = cat.title;
+            board.appendChild(header);
         });
-    }
 
-    renderScores();
-    boardActive = true;
+        const rows = categories[0].questions.length;
+
+        for (let i = 0; i < rows; i++) {
+            categories.forEach(cat => {
+                const q = cat.questions[i];
+
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+
+                const key = `${cat.title}-${q.value}`;
+                cell.dataset.key = key;
+
+                if (localStorage.getItem(key) === "used") {
+                    cell.classList.add("used");
+                }
+
+                cell.textContent = q.value;
+                cell.addEventListener("click", () => openQuestion(q, key));
+
+                board.appendChild(cell);
+            });
+        }
+
+        renderScores();
+        boardActive = true;
+    } catch (err) {
+        console.error("Error building board:", err);
+    }
 }
 
 // SCOREBOARD
@@ -254,11 +271,14 @@ function renderScores() {
 
     scoreboard.innerHTML = "";
 
+    console.log("renderScores called - gameData:", gameData);
     if (!gameData || !Array.isArray(gameData.participants) || gameData.participants.length === 0) {
-        return;
     }
 
     gameData.participants.forEach((p, index) => {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("score-wrapper");
+
         const box = document.createElement("div");
         box.classList.add("score-box");
 
@@ -273,9 +293,14 @@ function renderScores() {
         score.classList.add("score");
         score.textContent = p.score;
 
+        box.appendChild(name);
+        box.appendChild(divider);
+        box.appendChild(score);
+
+        // EDIT SCORE (main board only)
         const edit = document.createElement("button");
         edit.textContent = "Edit Score";
-        edit.style.marginTop = "6px";
+        edit.classList.add("edit-btn");
 
         edit.onclick = () => {
             const newScore = prompt("Enter new score for " + p.name, p.score);
@@ -288,14 +313,15 @@ function renderScores() {
             }
         };
 
-        box.appendChild(name);
-        box.appendChild(divider);
-        box.appendChild(score);
-        box.appendChild(edit);
+        wrapper.appendChild(box);
+        wrapper.appendChild(edit);
 
-        scoreboard.appendChild(box);
+        scoreboard.appendChild(wrapper);
     });
 }
+
+
+
 
 // MAIN MENU WARNING
 function goMainMenu() {

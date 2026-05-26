@@ -91,5 +91,8 @@ function loadPreset(type) {
     document.getElementById("upload-container")?.remove();
 
     // Ask for participants BEFORE building board
-    askParticipants().then(buildBoard);
+    askParticipants().then(() => {
+        sessionStorage.setItem("participantsSetup", "true");
+        buildBoard();
+    });
 }
