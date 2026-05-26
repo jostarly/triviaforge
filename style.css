@@ -8,11 +8,23 @@
     --panel-dark: #34224f;
     --button: #5d78cf;
     --button-dark: #435aa8;
-    --gold: #f2d16b;
+    --header-border: #ffffff;
     --cell: #324f9e;
     --cell-header: #20377c;
     --used: #5a5870;
     --text: #f5f2ff;
+    --border: #101010;
+    --board-bg: #1a1230;
+    --used-border: #1a1624;
+    --answer: #8f8;
+    --delete-bg: #f5b0b0;
+    --delete-text: #600;
+    --divider: #ffffff;
+}
+
+/* Use border-box everywhere to avoid unexpected overflow */
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 body {
@@ -20,6 +32,9 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+
+    justify-content: flex-start;
+    align-items: center;
 
     font-family: 'Silkscreen', sans-serif;
     background-color: var(--bg);
@@ -41,7 +56,7 @@ button {
     cursor: pointer;
     font-family: inherit;
 
-    border: 3px solid #101010;
+    border: 3px solid var(--border);
     border-radius: 0;
 
     background: var(--button);
@@ -75,7 +90,7 @@ button:active {
 
 /* Keyboard focus */
 button:focus-visible {
-    outline: 3px solid var(--gold);
+    outline: 3px solid var(--header-border);
     outline-offset: 2px;
 }
 
@@ -89,33 +104,107 @@ button:disabled {
    BOARD
 ========================================= */
 
+
 #board {
     display: grid;
-    gap: 6px;
+    gap: 8px 18px;
+
+    padding: 16px;
+
+    margin: 20px auto;
+
+    /* constrain to viewport to avoid scrollbars */
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 200px);
+
+    background: var(--board-bg);
+
+    border: 4px solid var(--border);
+    position: relative;
+
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.4),
+        inset 3px 3px 0 rgba(255,255,255,0.06),
+        0 6px 0 rgba(0,0,0,0.35);
+
+    overflow: hidden;
 }
+
+#board::before {
+    content: "";
+    position: absolute;
+}
+
+#board.hidden-board {
+    display: none;
+}
+
+/* =========================================
+   CELLS (BASE)
+========================================= */
 
 .cell {
     background: var(--cell);
-    padding: 24px 10px;
-    font-size: 36px;
+
+    border: 2px solid var(--border);
+
+    box-shadow:
+        inset -2px -2px 0 rgba(0,0,0,0.35),
+        inset 2px 2px 0 rgba(255,255,255,0.10);
+
+    padding: 18px 10px;
+
+    font-size: 32px;
     font-weight: bold;
 
     display: flex;
     align-items: center;
     justify-content: center;
+
     min-height: 70px;
+
+    transition: transform 0.08s ease, filter 0.12s ease;
 }
 
-.cell.category {
-    border: 2px solid var(--text);
-    background: var(--cell-header);
-    font-size: 36px;
-    cursor: default;
+/* Hover + press feel */
+.cell:hover {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
 }
+
+.cell:active {
+    transform: translateY(2px);
+}
+
+/* =========================================
+   CATEGORY CELLS
+========================================= */
+
+.cell.category {
+    border: 3px solid var(--header-border);
+    background: var(--cell-header);
+
+    font-size: 24px;
+    letter-spacing: 1px;
+
+    cursor: default;
+
+    box-shadow:
+        inset -2px -2px 0 rgba(0,0,0,0.35),
+        inset 2px 2px 0 rgba(255,255,255,0.08);
+}
+
+/* =========================================
+   USED CELLS
+========================================= */
 
 .cell.used {
     background: var(--used) !important;
     color: var(--text);
+
+    border: 2px solid var(--used-border);
+
+    box-shadow: none;
 }
 
 /* =========================================
@@ -137,10 +226,18 @@ button:disabled {
 }
 
 .score-box {
-    background: var(--panel);
-    border-radius: 0;
+    background: #34224f;
+
+    border: 3px solid #101010;
+
+    box-shadow:
+        inset -2px -2px 0 rgba(0,0,0,0.4),
+        inset 2px 2px 0 rgba(255,255,255,0.08);
+
     padding: 10px;
     width: 120px;
+
+    border-radius: 0;
     text-align: center;
 }
 
@@ -152,7 +249,7 @@ button:disabled {
 
 .score-box .divider {
     height: 1px;
-    background: white;
+    background: var(--divider);
     margin: 6px 0;
 }
 
@@ -207,7 +304,15 @@ button:disabled {
 }
 
 #modal-content {
-    background: var(--panel);
+    background: #34224f;
+
+    border: 4px solid #101010;
+
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.45),
+        inset 3px 3px 0 rgba(255,255,255,0.08),
+        0 6px 0 rgba(0,0,0,0.35);
+
     padding: 30px;
     width: 420px;
     border-radius: 0;
@@ -221,7 +326,7 @@ button:disabled {
 
 #answer-text {
     margin-top: 20px;
-    color: #8f8;
+    color: var(--answer);
 }
 
 /* =========================================
@@ -249,6 +354,8 @@ button:disabled {
     padding: 20px;
     background: var(--panel);
     text-align: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #question-footer button {
@@ -257,19 +364,203 @@ button:disabled {
     border-radius: 0px;
     min-width: 200px;
 }
+
+/* Footer buttons: center and constrain to match main menu */
+#site-footer,
+#question-footer {
+    display: flex;
+    justify-content: center;
+}
+
+#site-footer > button,
+#question-footer > button,
+#question-footer #back {
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
 /* =========================================
    ADMIN PANEL
 ========================================= */
 
 #admin-container {
     margin: 0 auto;
-    padding: 20px;
+    padding: 28px 24px 26px;
+    max-width: 1500px;
+    width: min(100%, 1500px);
+    min-height: calc(100vh - 130px);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 24px;
+    align-items: start;
 }
 
-.panel {
-    background: var(--panel);
-    padding: 20px;
-    margin-bottom: 25px;
+#admin-toolbar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+#admin-main {
+    display: grid;
+    grid-template-columns: minmax(320px, 420px) minmax(520px, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+#admin-container .panel {
+    display: grid;
+    gap: 18px;
+    text-align: left;
+    align-items: start;
+}
+
+#admin-container .panel h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.45rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+#admin-container .panel label {
+    display: block;
+    text-align: left;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+}
+
+#admin-container input,
+#admin-container select,
+#admin-container textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border: 2px solid var(--border);
+    background: #2b1c43;
+    color: var(--text);
+    box-sizing: border-box;
+}
+
+#admin-container textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.panel .form-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.panel .form-row > div {
+    flex: 1;
+    min-width: 180px;
+}
+
+#category-list,
+#list {
+    width: 100%;
+}
+
+#category-list > div,
+#list > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    background: rgba(255,255,255,0.03);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+#category-list > div {
+    align-items: flex-start;
+}
+
+#category-list > div button,
+#list > div button {
+    min-width: auto;
+    margin: 0 4px;
+}
+
+#category-list .category-actions,
+#list .question-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+#category-list .category-actions button,
+#list .question-actions button {
+    width: 100px;
+    min-width: 100px;
+    margin: 0;
+    padding: 6px 10px;
+}
+
+#list h3 {
+    margin-top: 20px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 8px;
+}
+
+#admin-container .panel button {
+    width: auto;
+    min-width: 180px;
+}
+
+#remove-image,
+#remove-audio {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.preview-img,
+.preview-audio {
+    margin-top: 8px;
+    max-width: 100%;
+}
+
+.gba-panel {
+    background: #34224f;
+
+    border: 4px solid #101010;
+
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.45),
+        inset 3px 3px 0 rgba(255,255,255,0.08),
+        0 6px 0 rgba(0,0,0,0.35);
+
+    padding: 16px;
+}
+
+#admin-container .panel {
+    background: #34224f;
+
+    border: 4px solid #101010;
+
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.45),
+        inset 3px 3px 0 rgba(255,255,255,0.08),
+        0 6px 0 rgba(0,0,0,0.35);
+
+    gap: 18px;
+    padding: 16px;
+
     border-radius: 0;
 
     display: flex;
@@ -278,17 +569,17 @@ button:disabled {
     text-align: center;
 }
 
-.panel .row {
+#admin-container .panel .row {
     width: 100%;
     align-items: start;
 }
 
-.panel h2 {
+#admin-container .panel h2 {
     margin-top: 0;
     margin-bottom: 15px;
 }
 
-label {
+#admin-container label {
     display: block;
     margin-top: 12px;
 }
@@ -370,8 +661,8 @@ textarea {
 /* DELETE BUTTON (light red) */
 #list button.delete,
 #category-list button.delete {
-    background: #f5b0b0;
-    color: #600;
+    background: var(--delete-bg);
+    color: var(--delete-text);
 }
 
 /* NEW CATEGORY INPUT */
@@ -395,8 +686,13 @@ textarea {
     max-width: 400px;
     margin: 80px auto;
     text-align: center;
-    background: var(--panel);
+    background: #34224f;
     padding: 40px;
+    border: 4px solid #101010;
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.45),
+        inset 3px 3px 0 rgba(255,255,255,0.08),
+        0 6px 0 rgba(0,0,0,0.35);
     border-radius: 0;
 }
 
@@ -415,7 +711,12 @@ textarea {
 #upload-container {
     margin: 0px auto 80px auto;
     padding: 30px;
-    background: var(--panel);
+    background: #34224f;
+    border: 4px solid #101010;
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.45),
+        inset 3px 3px 0 rgba(255,255,255,0.08),
+        0 6px 0 rgba(0,0,0,0.35);
     border-radius: 0;
     max-width: 420px;
     text-align: center;
@@ -467,6 +768,7 @@ textarea {
     padding: 20px;
     background: var(--panel);
     text-align: center;
+    width: 100%;
 }
 
 #site-footer button {

@@ -259,9 +259,18 @@ function buildBoard() {
 
         renderScores();
         boardActive = true;
+
+        // Reveal the board element once built
+        showBoard();
     } catch (err) {
         console.error("Error building board:", err);
     }
+}
+
+function showBoard() {
+    const board = document.getElementById("board");
+    if (!board) return;
+    board.classList.remove("hidden-board");
 }
 
 // SCOREBOARD

@@ -15,37 +15,35 @@
 <body>
 
 <div id="admin-container" class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-lg-2 col-md-6 text-center">
+    <div id="admin-toolbar" class="row justify-content-center">
+        <div class="col-lg-3 col-md-6 text-center">
             <section class="panel">
                 <h2>Load Game</h2>
-                <div>
-                    <input type="file" id="json-upload" accept=".json">
-                </div>
+                <input type="file" id="json-upload" accept=".json">
             </section>
         </div>
-        <div class="col-lg-2 col-md-6 text-center">
+        <div class="col-lg-4 col-md-6 text-center">
             <section class="panel">
                 <h2>Game Name</h2>
                 <input id="game-name" placeholder="My Trivia Game">
             </section>
         </div>
-        <div class="col-lg-1">
+        <div class="col-lg-3 col-md-6 text-center">
             <section class="panel">
-                <button id="download" style="background-color: green;">Save Game</button>
+                <button id="download">Save Game</button>
             </section>
         </div>
     </div>
 
-    <div class="row g-4">
+    <div id="admin-main" class="row g-4">
         <!-- LEFT COLUMN: Setup & Categories -->
         <div class="col-lg-4">
             <section class="panel">
                 <h2>Categories</h2>
 
-                <input id="new-category" placeholder="New category name" style="width: 50%;">
+                <input id="new-category" placeholder="New category name">
 
-                <button id="add-category" style="background-color: green;">Save Category</button>
+                <button id="add-category">Save Category</button>
 
                 <div id="category-list"></div>
             </section>
@@ -81,16 +79,16 @@
                 <div class="file-upload">
                     <input type="file" id="image-upload" accept="image/*">
                 </div>
-                <img id="image-preview" style="max-width: 200px; display: none; margin-top: 8px;">
-                <button id="remove-image" style="display:none; margin-top: 5px;">Remove Image</button>
+                <img id="image-preview" class="preview-img" style="display: none;">
+                <button id="remove-image">Remove Image</button>
 
                 <label>Audio (optional)</label>
                 <div class="file-upload">
                     <input type="file" id="audio-upload" accept="audio/*">
                 </div>
-                <audio id="audio-preview" controls style="display: none; margin-top: 8px;"></audio>
-                <button id="remove-audio" style="display:none; margin-top: 5px;">Remove Audio</button>
-                <button id="add" style="background-color: green;">Save  Question</button>
+                <audio id="audio-preview" class="preview-audio" controls style="display: none;"></audio>
+                <button id="remove-audio">Remove Audio</button>
+                <button id="add">Save Question</button>
             </section>
         </div>
     </div>
@@ -176,8 +174,12 @@ function renderCategoryList() {
             renderAll();
         };
 
-        div.appendChild(edit);
-        div.appendChild(del);
+        const actions = document.createElement("div");
+        actions.className = "category-actions";
+        actions.appendChild(edit);
+        actions.appendChild(del);
+
+        div.appendChild(actions);
         list.appendChild(div);
     });
 }
@@ -367,9 +369,13 @@ function renderQuestionList() {
                         renderQuestionList();
                     };
 
-                    div.appendChild(edit);
-                    div.appendChild(duplicate);
-                    div.appendChild(del);
+                    const actions = document.createElement("div");
+                    actions.className = "question-actions";
+                    actions.appendChild(edit);
+                    actions.appendChild(duplicate);
+                    actions.appendChild(del);
+
+                    div.appendChild(actions);
                     list.appendChild(div);
                 });
             }
