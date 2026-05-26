@@ -15,24 +15,20 @@
 <body>
 
 <div id="admin-container" class="container-fluid">
-    <div id="admin-toolbar" class="row justify-content-center">
-        <div class="col-lg-3 col-md-6 text-center">
-            <section class="panel">
-                <h2>Load Game</h2>
-                <input type="file" id="json-upload" accept=".json">
-            </section>
-        </div>
-        <div class="col-lg-4 col-md-6 text-center">
-            <section class="panel">
-                <h2>Game Name</h2>
-                <input id="game-name" placeholder="My Trivia Game">
-            </section>
-        </div>
-        <div class="col-lg-3 col-md-6 text-center">
-            <section class="panel">
-                <button id="download">Save Game</button>
-            </section>
-        </div>
+    <div id="admin-toolbar">
+        <section class="panel admin-header-panel">
+            <div class="header-row">
+                <div class="header-left">
+                    <label class="header-label" for="game-name">Game Name</label>
+                    <input type="text" id="game-name" placeholder="My Trivia Game">
+                    <button id="download">Save Game</button>
+                </div>
+                <div class="header-right">
+                    <label class="header-label" for="json-upload">Load Game</label>
+                    <input type="file" id="json-upload" accept=".json">
+                </div>
+            </div>
+        </section>
     </div>
 
     <div id="admin-main" class="row g-4">

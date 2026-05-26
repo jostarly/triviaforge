@@ -335,11 +335,42 @@ function renderScores() {
 // MAIN MENU WARNING
 function goMainMenu() {
     if (boardActive) {
-        const sure = confirm("Game state will not be saved. Are you sure you want to leave?");
-        if (!sure) return;
+        showConfirmationModal(
+            "Game state will not be saved. Are you sure you want to leave?",
+            () => {
+                window.location.href = "mainmenu.html";
+            }
+        );
+    } else {
+        window.location.href = "mainmenu.html";
     }
+}
 
-    window.location.href = "mainmenu.html";
+// CONFIRMATION MODAL
+function showConfirmationModal(message, onConfirm) {
+    const modal = document.getElementById('confirmation-modal');
+    const textElement = document.getElementById('confirmation-text');
+    const confirmBtn = document.getElementById('confirm-yes');
+    const cancelBtn = document.getElementById('confirm-no');
+
+    textElement.textContent = message;
+    modal.classList.remove('hidden');
+
+    const handleConfirm = () => {
+        modal.classList.add('hidden');
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+        onConfirm();
+    };
+
+    const handleCancel = () => {
+        modal.classList.add('hidden');
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+    };
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleCancel);
 }
 
 // OPEN QUESTION
