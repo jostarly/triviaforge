@@ -17,22 +17,24 @@
 <div id="question-container">
     <div class="question-layout">
         <div class="question-main">
-            <p id="question-text"></p>
+            <div class="question-content">
+                <p id="question-text"></p>
 
-            <img id="question-image"
-                 style="max-width: 80%;
-                        max-height: 400px;
-                        display: none;
-                        margin: 12px auto;
-                        object-fit: contain;">
+                <img id="question-image"
+                     style="max-width: 78%;
+                            max-height: 360px;
+                            display: none;
+                            margin: 12px auto;
+                            object-fit: contain;">
 
-            <audio id="question-audio"
-                   controls
-                   style="display: none;
-                          margin: 12px auto;"></audio>
+                <audio id="question-audio"
+                       controls
+                       style="display: none;
+                              margin: 12px auto;"></audio>
 
-            <button id="show-answer">Show Answer</button>
-            <p id="answer-text" class="hidden"></p>
+                <button id="show-answer">Show Answer</button>
+                <p id="answer-text" class="hidden"></p>
+            </div>
 
             <div id="participant-scores"></div>
         </div>
@@ -224,6 +226,7 @@ document.getElementById("time-increase").onclick = () => {
 
 updateTimeValueDisplay();
 updateCountdownDisplay();
+showParticipantScores();
 
 // SHOW / HIDE ANSWER
 const showAnswerButton = document.getElementById("show-answer");
@@ -234,6 +237,16 @@ function setAnswerVisible(visible) {
     answerVisible = visible;
     answerTextElement.classList.toggle("hidden", !visible);
     showAnswerButton.textContent = visible ? "Hide Answer" : "Show Answer";
+
+    const questionImage = document.getElementById("question-image");
+    if (questionImage) {
+        questionImage.style.display = visible ? "none" : (questionImage.src ? "block" : "none");
+    }
+
+    const questionAudio = document.getElementById("question-audio");
+    if (questionAudio) {
+        questionAudio.style.display = visible ? "none" : (questionAudio.src ? "block" : "none");
+    }
 
     if (visible) {
         playSound("chime");

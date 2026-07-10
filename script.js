@@ -101,6 +101,11 @@ function requestJsonUpload() {
         const file = e.target.files[0];
         if (!file) return;
 
+        if (file.size > 8 * 1024 * 1024) {
+            alert("The JSON file is too large to load in this browser. Use external image/audio file paths instead of embedded base64 data, or reduce the file size.");
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = ev => {
             try {
@@ -117,8 +122,14 @@ function requestJsonUpload() {
                     localStorage.removeItem(key);
                 }
 
-                sessionStorage.setItem("gameData", JSON.stringify(gameData));
-                sessionStorage.removeItem("participantsSetup");
+                try {
+                    sessionStorage.setItem("gameData", JSON.stringify(gameData));
+                    sessionStorage.removeItem("participantsSetup");
+                } catch (err) {
+                    console.error("Failed to save game data to sessionStorage:", err);
+                    alert("Unable to load this game because it is too large for browser storage. Use external image/audio paths or reduce file size.");
+                    return;
+                }
 
                 document.getElementById("upload-container")?.remove();
 

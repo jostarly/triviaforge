@@ -79,6 +79,7 @@
                 <div class="file-upload">
                     <input type="file" id="image-upload" accept="image/*">
                 </div>
+                <input type="text" id="image-path" placeholder="Image file path or URL">
                 <img id="image-preview" class="preview-img" style="display: none;">
                 <button id="remove-image">Remove Image</button>
 
@@ -86,6 +87,7 @@
                 <div class="file-upload">
                     <input type="file" id="audio-upload" accept="audio/*">
                 </div>
+                <input type="text" id="audio-path" placeholder="Audio file path or URL">
                 <audio id="audio-preview" class="preview-audio" controls style="display: none;"></audio>
                 <button id="remove-audio">Remove Audio</button>
                 <button id="add">Save Question</button>
@@ -335,12 +337,26 @@ function renderQuestionList() {
                             document.getElementById("image-preview").src = q.image;
                             document.getElementById("image-preview").style.display = "block";
                             document.getElementById("remove-image").style.display = "inline-block";
+                            if (!q.image.startsWith("data:")) {
+                                document.getElementById("image-path").value = q.image;
+                            } else {
+                                document.getElementById("image-path").value = "";
+                            }
+                        } else {
+                            document.getElementById("image-path").value = "";
                         }
 
                         if (q.audio) {
                             document.getElementById("audio-preview").src = q.audio;
                             document.getElementById("audio-preview").style.display = "block";
                             document.getElementById("remove-audio").style.display = "inline-block";
+                            if (!q.audio.startsWith("data:")) {
+                                document.getElementById("audio-path").value = q.audio;
+                            } else {
+                                document.getElementById("audio-path").value = "";
+                            }
+                        } else {
+                            document.getElementById("audio-path").value = "";
                         }
                     };
 
@@ -400,25 +416,30 @@ document.getElementById("add").onclick = async () => {
     let category = gameData.categories.find(c => c.title === categoryName);
     if (!category) return;
 
-    let imageData = null;
-    let audioData = null;
+    let imageData;
+    let audioData;
 
     const imgFile = document.getElementById("image-upload").files[0];
     const audioFile = document.getElementById("audio-upload").files[0];
+    const imagePath = document.getElementById("image-path").value.trim();
+    const audioPath = document.getElementById("audio-path").value.trim();
 
     if (imgFile) imageData = await toDataURL(imgFile);
+    else if (imagePath) imageData = imagePath;
+
     if (audioFile) audioData = await toDataURL(audioFile);
+    else if (audioPath) audioData = audioPath;
 
     if (editingQuestion) {
         const q = category.questions[editingQuestion.qIndex];
         q.value = value;
         q.question = question;
         q.answer = answer;
-        q.image = imageData || q.image;
-        q.audio = audioData || q.audio;
+        if (imageData !== undefined) q.image = imageData;
+        if (audioData !== undefined) q.audio = audioData;
         editingQuestion = null;
     } else {
-        category.questions.push({ value, question, answer, image: imageData, audio: audioData });
+        category.questions.push({ value, question, answer, image: imageData || null, audio: audioData || null });
     }
 
     hasUnsavedChanges = true;
@@ -442,6 +463,8 @@ function clearForm() {
 
     document.getElementById("image-upload").value = "";
     document.getElementById("audio-upload").value = "";
+    document.getElementById("image-path").value = "";
+    document.getElementById("audio-path").value = "";
 
     document.getElementById("image-preview").style.display = "none";
     document.getElementById("audio-preview").style.display = "none";
