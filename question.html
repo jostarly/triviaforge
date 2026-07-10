@@ -15,24 +15,53 @@
 <body>
 
 <div id="question-container">
-    <p id="question-text"></p>
+    <div class="question-layout">
+        <div class="question-main">
+            <p id="question-text"></p>
 
-    <img id="question-image"
-         style="max-width: 80%;
-                max-height: 400px;
-                display: none;
-                margin: 12px auto;
-                object-fit: contain;">
+            <img id="question-image"
+                 style="max-width: 80%;
+                        max-height: 400px;
+                        display: none;
+                        margin: 12px auto;
+                        object-fit: contain;">
 
-    <audio id="question-audio"
-           controls
-           style="display: none;
-                  margin: 12px auto;"></audio>
+            <audio id="question-audio"
+                   controls
+                   style="display: none;
+                          margin: 12px auto;"></audio>
 
-    <button id="show-answer">Show Answer</button>
-    <p id="answer-text" class="hidden"></p>
+            <button id="show-answer">Show Answer</button>
+            <p id="answer-text" class="hidden"></p>
 
-    <div id="participant-scores"></div>
+            <div id="participant-scores"></div>
+        </div>
+
+        <aside class="question-sidebar">
+            <div id="stopwatch-panel" class="stopwatch-panel" aria-live="polite">
+                <div class="stopwatch-shell">
+                    <div class="stopwatch-controls-panel">
+                        <div class="stopwatch-time-adjuster">
+                            <button id="time-decrease" class="time-adjust-btn" type="button">−</button>
+                            <div id="time-value" class="time-value">01:00</div>
+                            <button id="time-increase" class="time-adjust-btn" type="button">+</button>
+                        </div>
+                    </div>
+
+                    <div class="stopwatch-face">
+                        <div id="stopwatch-display" class="stopwatch-display">01:00</div>
+                    </div>
+
+                    <div class="stopwatch-controls-panel bottom-controls">
+                        <div class="stopwatch-action-stack">
+                            <button id="stopwatch-toggle" type="button">Start</button>
+                            <button id="stopwatch-reset" type="button">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
 </div>
 
 <!-- FOOTER BACK BUTTON -->
@@ -82,12 +111,138 @@ if (key) {
     localStorage.setItem(key, "used");
 }
 
-// SHOW ANSWER
-document.getElementById("show-answer").onclick = () => {
-    playSound("chime");
-    document.getElementById("answer-text").classList.remove("hidden");
+// COUNTDOWN TIMER
+let countdownRunning = false;
+let countdownStartedAt = 0;
+let countdownRemainingMs = 60000;
+let countdownStartingMs = 60000;
+let countdownTimerId = null;
 
-    showParticipantScores();
+function formatCountdown(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const minutes = String(Math.floor(totalSeconds / 60));
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
+}
+
+function updateCountdownDisplay() {
+    const display = document.getElementById("stopwatch-display");
+    if (!display) return;
+
+    const remaining = countdownRunning
+        ? countdownRemainingMs - (Date.now() - countdownStartedAt)
+        : countdownRemainingMs;
+
+    const safeRemaining = Math.max(0, remaining);
+    display.textContent = formatCountdown(safeRemaining);
+
+    if (safeRemaining <= 0) {
+        pauseCountdown();
+        playSound("chime");
+    }
+}
+
+function startCountdown() {
+    if (countdownRunning) return;
+
+    countdownRunning = true;
+    countdownStartedAt = Date.now();
+    document.getElementById("stopwatch-toggle").textContent = "Pause";
+
+    countdownTimerId = window.setInterval(updateCountdownDisplay, 100);
+    updateCountdownDisplay();
+}
+
+function pauseCountdown() {
+    if (!countdownRunning) return;
+
+    countdownRemainingMs = Math.max(0, countdownRemainingMs - (Date.now() - countdownStartedAt));
+    countdownRunning = false;
+    document.getElementById("stopwatch-toggle").textContent = "Start";
+
+    if (countdownTimerId) {
+        window.clearInterval(countdownTimerId);
+        countdownTimerId = null;
+    }
+
+    updateCountdownDisplay();
+}
+
+function resetCountdown() {
+    if (countdownTimerId) {
+        window.clearInterval(countdownTimerId);
+        countdownTimerId = null;
+    }
+
+    countdownRunning = false;
+    countdownStartedAt = 0;
+    countdownRemainingMs = countdownStartingMs;
+    document.getElementById("stopwatch-toggle").textContent = "Start";
+    updateCountdownDisplay();
+    updateTimeValueDisplay();
+}
+
+function setCountdown(seconds) {
+    countdownRemainingMs = seconds * 1000;
+    countdownStartingMs = countdownRemainingMs;
+    countdownStartedAt = 0;
+    if (!countdownRunning) {
+        updateCountdownDisplay();
+    }
+}
+
+document.getElementById("stopwatch-toggle").onclick = () => {
+    if (countdownRunning) {
+        pauseCountdown();
+    } else {
+        startCountdown();
+    }
+};
+
+document.getElementById("stopwatch-reset").onclick = resetCountdown;
+
+function updateTimeValueDisplay() {
+    const value = document.getElementById("time-value");
+    if (value) {
+        value.textContent = formatCountdown(countdownRemainingMs);
+    }
+}
+
+document.getElementById("time-decrease").onclick = () => {
+    const newSeconds = Math.max(30, Math.floor(countdownRemainingMs / 1000) - 30);
+    setCountdown(newSeconds);
+    resetCountdown();
+    updateTimeValueDisplay();
+};
+
+document.getElementById("time-increase").onclick = () => {
+    const newSeconds = Math.floor(countdownRemainingMs / 1000) + 30;
+    setCountdown(newSeconds);
+    resetCountdown();
+    updateTimeValueDisplay();
+};
+
+updateTimeValueDisplay();
+updateCountdownDisplay();
+
+// SHOW / HIDE ANSWER
+const showAnswerButton = document.getElementById("show-answer");
+const answerTextElement = document.getElementById("answer-text");
+let answerVisible = false;
+
+function setAnswerVisible(visible) {
+    answerVisible = visible;
+    answerTextElement.classList.toggle("hidden", !visible);
+    showAnswerButton.textContent = visible ? "Hide Answer" : "Show Answer";
+
+    if (visible) {
+        playSound("chime");
+        showParticipantScores();
+    }
+}
+
+showAnswerButton.onclick = () => {
+    setAnswerVisible(!answerVisible);
 };
 
 // SHOW PARTICIPANTS (with individual give buttons)
@@ -122,7 +277,7 @@ function showParticipantScores() {
 
         const give = document.createElement("button");
         give.textContent = "Give Points";
-        give.style.marginTop = "6px";
+        give.className = "give-btn";
 
         give.onclick = () => {
             givePoints(index);

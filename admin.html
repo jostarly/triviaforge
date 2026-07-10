@@ -16,16 +16,20 @@
 
 <div id="admin-container" class="container-fluid">
     <div id="admin-toolbar">
-        <section class="panel admin-header-panel">
+        <section class="panel admin-header-panel" style="padding-top: 0px; padding-bottom: 0px;">
             <div class="header-row">
                 <div class="header-left">
-                    <label class="header-label" for="game-name">Game Name</label>
-                    <input type="text" id="game-name" placeholder="My Trivia Game">
-                    <button id="download">Save Game</button>
+                    <div class="header-game-group">
+                        <h2 class="header-label" for="game-name">Game Name</h2>
+                        <input type="text" id="game-name" placeholder="My Trivia Game">
+                        <button id="download">Save Game</button>
+                    </div>
                 </div>
                 <div class="header-right">
-                    <label class="header-label" for="json-upload">Load Game</label>
-                    <input type="file" id="json-upload" accept=".json">
+                    <div class="header-load-group">
+                        <h2 class="header-label" for="json-upload">Load Game</h2>
+                        <input type="file" id="json-upload" accept=".json">
+                    </div>
                 </div>
             </div>
         </section>

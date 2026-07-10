@@ -134,8 +134,6 @@ button:disabled {
 
     padding: 16px;
 
-    margin: 20px auto;
-
     /* constrain to viewport to avoid scrollbars */
     max-width: calc(100vw - 40px);
     max-height: calc(100vh - 200px);
@@ -219,6 +217,12 @@ button:disabled {
     box-shadow:
         inset -2px -2px 0 rgba(0,0,0,0.35),
         inset 2px 2px 0 rgba(255,255,255,0.08);
+}
+
+.cell.category:hover,
+.cell.category:active {
+    filter: none;
+    transform: none;
 }
 
 /* =========================================
@@ -306,8 +310,10 @@ button:disabled {
 
 /* GIVE POINTS BUTTON (question page) */
 .give-btn {
-    margin-top: 6px;
-    padding: 6px 10px;
+    margin-top: 2px;
+    padding: 0px;
+    font-size: 0.8rem;
+    line-height: 1.2;
 }
 
 #participant-scores {
@@ -362,6 +368,144 @@ button:disabled {
 #answer-text {
     margin-top: 20px;
     color: var(--answer);
+}
+
+.question-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 32px;
+    align-items: start;
+}
+
+.question-main {
+    min-width: 0;
+}
+
+.question-sidebar {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 40px;
+}
+
+.stopwatch-panel {
+    width: 100%;
+}
+
+.stopwatch-shell {
+    width: min(100%, 300px);
+    padding: 16px 14px 16px;
+    background: rgba(73, 52, 109, 0.9);
+    border: 4px solid var(--border);
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.35),
+        inset 3px 3px 0 rgba(255,255,255,0.08),
+        0 6px 0 rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stopwatch-controls-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.stopwatch-controls-panel.bottom-controls {
+    margin-top: 2px;
+}
+
+.stopwatch-time-adjuster {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.time-adjust-btn {
+    font-size: 1.1rem;
+    padding: 6px 10px;
+    min-width: 42px;
+    background: #6f6f6f;
+}
+
+.time-value {
+    min-width: 84px;
+    text-align: center;
+    font-size: 1.6rem;
+    color: var(--text);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+}
+
+.stopwatch-face {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    border: 4px solid var(--border);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.16), transparent 30%),
+        linear-gradient(145deg, #586fb3, #2a3c7a);
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.35),
+        inset 3px 3px 0 rgba(255,255,255,0.08),
+        0 6px 0 rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    margin: 8px 0 6px;
+}
+
+.stopwatch-face::before {
+    content: "";
+    position: absolute;
+    inset: 16px;
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.stopwatch-face::after {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    border: 1px dashed rgba(255,255,255,0.12);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.stopwatch-display {
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--text);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+    z-index: 1;
+}
+
+.stopwatch-action-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    background: #3e3e3e;
+    border: 3px solid var(--border);
+    box-shadow:
+        inset -2px -2px 0 rgba(0,0,0,0.3),
+        inset 2px 2px 0 rgba(255,255,255,0.08);
+}
+
+.stopwatch-action-stack button {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    min-width: 84px;
+    background: #6f6f6f;
 }
 
 /* =========================================
@@ -494,56 +638,81 @@ button:disabled {
     border: none;
     box-shadow: none;
     background: #5a5a5a;
-    padding: 10px 24px;
+    padding: 0 16px;
     border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
 #admin-toolbar .header-row {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
+    width: 100%;
+    gap: 24px;
+    flex-wrap: nowrap;
 }
 
 #admin-toolbar .header-left,
 #admin-toolbar .header-right {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 12px;
+    flex-wrap: nowrap;
+    min-height: 56px;
 }
 
 #admin-toolbar .header-left {
-    flex: 1;
-    min-width: 280px;
+    justify-content: flex-start;
+    margin-left: 0;
+    padding-left: 0;
+    gap: 16px;
 }
 
 #admin-toolbar .header-right {
     justify-content: flex-end;
-    min-width: 240px;
+    margin-left: auto;
+    padding-right: 0;
+    gap: 16px;
+}
+
+#admin-toolbar .header-game-group,
+#admin-toolbar .header-load-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    min-height: 56px;
 }
 
 #admin-toolbar .header-label {
-    font-weight: bold;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.1;
     white-space: nowrap;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
 }
 
 #admin-toolbar input[type="text"] {
     width: auto;
-    min-width: 200px;
+    min-width: 280px;
     max-width: 360px;
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 1rem;
 }
 
 #admin-toolbar input[type="file"] {
     width: auto;
-    min-width: 180px;
+    min-width: 220px;
+    font-size: 0.95rem;
 }
 
 #admin-toolbar button {
     width: auto;
-    min-width: 140px;
+    min-width: 150px;
     margin: 0;
+    padding: 10px 16px;
+    font-size: 0.95rem;
 }
 
 #admin-main {
